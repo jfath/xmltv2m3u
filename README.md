@@ -1,7 +1,4 @@
-# Copyright (c) 2017 Jerry Fath  
-#  MIT License (see source)  
-# Jerry Fath jerryfath at gmail dot com  
-#  
+# xmltv2m3u.pl  
   
 Read an xml file produced by xmltv and use the data to create an m3u playlist and
 sources file for tvheadend and node-ffmpeg-mpegts-proxy  
@@ -21,3 +18,7 @@ Install and configure xmltv then produce the channel list file using:
 xmltv --config-file myconfig --list-channel --output channels.xml  
   
 'xmltv2m3u.pl channels.xml' will write channels.m3u and channels.json in the same directory as channels.xml.  These files can be used as the playlist for a tvheadend IPTV automatic network and the sources file for node-ffmpeg-mpegts-proxy  
+  
+Copyright (c) 2017 Jerry Fath  
+Jerry Fath jerryfath at gmail dot com  
+MIT License (see source)  
