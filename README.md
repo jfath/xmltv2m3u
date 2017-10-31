@@ -1,8 +1,5 @@
-#  
 # Copyright (c) 2017 Jerry Fath  
-#  
 #  MIT License (see source)  
-#  
 # Jerry Fath jerryfath at gmail dot com  
 #  
   
