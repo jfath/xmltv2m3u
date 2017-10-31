@@ -1,0 +1,29 @@
+#!/usr/bin/perl
+
+# make sure to set this string to
+# the corresponding remote in /etc/lircd.conf
+$remote_name = "adb3800";
+$trans_number = 1;
+
+my $chanlength;
+my $digit;
+my $channel;
+
+sub change_channel {
+        my($channel_digit) = @_;
+        system ("irsend SEND_ONCE $remote_name KEY_$channel_digit");
+        sleep 1.5;
+}
+
+system ("irsend set_transmitters $trans_number");
+sleep 2;
+
+$channel=$ARGV[0];
+$chanlength = length($channel);
+for ($digit=0; $digit < $chanlength; $digit++) {
+        change_channel(substr($channel, $digit, 1));
+}
+
+system ("irsend SEND_ONCE $remote_name KEY_OK");
+
+exit 0;
