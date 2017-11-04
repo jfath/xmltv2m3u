@@ -105,7 +105,8 @@ foreach my $channel ($dom->findnodes('//channel')) {
     print FILEJSON '        "url": ' . '"/' . $names[2] . '"' . ",\n";
     print FILEJSON '        "source": ' . '"' . $iptvsource . '"' . ",\n";
     print FILEJSON '        "prescript": ' . '"' . $iptvpre . '"' . ",\n";
-    print FILEJSON '        "postscript": ' . '"' . $iptvpost . '"' . "\n";
+    print FILEJSON '        "postscript": ' . '"' . $iptvpost . '"' . ",\n";
+    print FILEJSON '        "realtime": false' . "\n";
     print FILEJSON "    }";
 
     $channelcnt = $channelcnt + 1;
