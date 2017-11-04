@@ -1,0 +1,11 @@
+#!/bin/bash
+
+#grab the first SD lineup
+tv_grab_na_dd --config-file=/home/hts/tvh/myxmltv.conf --output=/home/hts/tvh/myxmltv.xml --dd-data=/home/hts/tvh/dd.xml
+#grab the second SD lineup without re-download
+tv_grab_na_dd --config-file=/home/hts/tvh/myxmltv2.conf --output=/home/hts/tvh/myxmltv2.xml --dd-data=/home/hts/tvh/dd.xml --reprocess
+#merge the two xml listing files into one
+tv_cat /home/hts/tvh/myxmltv.xml /home/hts/tvh/myxmltv2.xml >/home/hts/tvh/myxmltvall.xml
+
+#pump the epg data into Tvheadend
+netcat -U /home/hts/.hts/tvheadend/epggrab/xmltv.sock < /home/hts/tvh/myxmltvall.xml
