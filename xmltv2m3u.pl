@@ -39,11 +39,14 @@ use File::stat;
 use XML::LibXML;
 
 #
-#Customize thes for your provider
+#Customize these for your provider
 my $iptvprovider = "Smithville Digital";
 my $iptvsource = "http://192.168.222.90:8080/hdmi";
 my $iptvpre = "/home/hts/tvh/pre.sh";
 my $iptvpost = "/home/hts/tvh/post.sh";
+#Indexes for full channel name and number with the xml display-name array
+my $nameindex = 4;
+my $numberindex = 2;
 
 sub badusage {
     print "Usage: xmltv2m3u.pl infile.xml\n";
@@ -63,6 +66,24 @@ unless ( -f $infile) {
     badusage();
 }
 
+#create dom from xmltv file
+my $dom = XML::LibXML->load_xml(location => $infile);
+
+#Loop through each channel in the dom extracting needed info to a hash array
+my @channelinfo;
+foreach my $channel ( $dom->findnodes('//channel') ) {
+    my $displaynames = join ',', map {
+        $_->to_literal();
+    } $channel->findnodes('./display-name');
+
+    my @names = split(',', $displaynames);
+
+    push @channelinfo, { 'name' => $names[$nameindex], 'number' => $names[$numberindex] };
+}
+
+#sort channel info hash array by channel name
+@channelinfo = sort { lc($a->{name}) cmp lc($b->{name}) } @channelinfo;
+
 #Open output files
 #Get basename from infile and use .m3u and .json extensions
 my ($inbase, $indirs, $inext) = fileparse($infile, qr/\.[^.]*/);
@@ -79,37 +100,29 @@ open FILEJSON, ">", "$outjson" or die $!;
 print FILEM3U "#EXTM3U\n";
 print FILEJSON "[\n";
 
-#create dom from xmltv file
-my $dom = XML::LibXML->load_xml(location => $infile);
-
-#loop through each channel in xml extracting the needed info
+#Loop through each hash writing file entries
 my $channelcnt = 0;
-foreach my $channel ($dom->findnodes('//channel')) {
-    my $displaynames = join ',', map {
-        $_->to_literal();
-    } $channel->findnodes('./display-name');
-
-    my @names = split(',', $displaynames);
+foreach my $channelitem ( @channelinfo ) {
 
     #write m3u entry for channel
-    print FILEM3U "#EXTINF:0," . $names[0] . "\n";
-    print FILEM3U "http://127.0.0.1:9128/" . $names[2] . "\n";
+    print FILEM3U "#EXTINF:0," . $channelitem->{'name'} . "\n";
+    print FILEM3U "http://127.0.0.1:9128/" . $channelitem->{'number'} . "\n";
 
     #write sources entry for channel
     if ($channelcnt != 0) {
         print FILEJSON ",\n";
     }
     print FILEJSON "    {\n";
-    print FILEJSON '        "name": ' . '"' . $names[0] . '"' . ",\n";
+    print FILEJSON '        "name": ' . '"' . $channelitem->{'name'} . '"' . ",\n";
     print FILEJSON '        "provider": ' . '"' . $iptvprovider . '"' . ",\n";
-    print FILEJSON '        "url": ' . '"/' . $names[2] . '"' . ",\n";
+    print FILEJSON '        "url": ' . '"/' . $channelitem->{'number'} . '"' . ",\n";
     print FILEJSON '        "source": ' . '"' . $iptvsource . '"' . ",\n";
     print FILEJSON '        "prescript": ' . '"' . $iptvpre . '"' . ",\n";
     print FILEJSON '        "postscript": ' . '"' . $iptvpost . '"' . ",\n";
     print FILEJSON '        "realtime": false' . "\n";
     print FILEJSON "    }";
 
-    $channelcnt = $channelcnt + 1;
+    $channelcnt++;
 }
 
 print FILEJSON "\n]\n";
